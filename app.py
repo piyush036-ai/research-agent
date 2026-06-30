@@ -15,7 +15,7 @@ credentials = Credentials(url="https://us-south.ml.cloud.ibm.com", api_key="I0q_
 model = ModelInference(
     model_id="ibm/granite-4-h-small",
     credentials=credentials,
-    project_id=IBM_PROJECT_ID,
+    project_id="c5cfb7b8-e423-4774-b20b-5486195ca6fe",
     params={
         "max_new_tokens": 800,
         "temperature": 0.7,
