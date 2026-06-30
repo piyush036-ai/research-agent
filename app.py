@@ -9,7 +9,7 @@ app = Flask(__name__)
 # Read from environment variables (set these in Render's dashboard, never in code)
 IBM_API_KEY    = os.environ.get("IBM_API_KEY")
 IBM_PROJECT_ID = os.environ.get("IBM_PROJECT_ID")
-IBM_URL        = os.environ.get("IBM_URL", "https://us-south.ml.cloud.ibm.com")
+IBM_URL        = os.environ.get("IBM_URL")
 credentials = Credentials(url=IBM_URL, api_key=IBM_API_KEY)
 
 model = ModelInference(
