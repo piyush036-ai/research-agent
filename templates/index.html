@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResearchMate – AI Research Agent</title>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --border:    #30363d;
+      --blue:      #1f6feb;
+      --blue-glow: rgba(31, 111, 235, 0.18);
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --accent:    #58a6ff;
+      --success:   #3fb950;
+      --radius:    10px;
+      --font:      'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ───────────────────────────────────────────────────────── */
+    header {
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+    }
+
+    .logo {
+      width: 36px; height: 36px;
+      background: var(--blue);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+    header span { font-size: 13px; color: var(--muted); margin-left: 4px; }
+
+    .ibm-badge {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .ibm-badge b { color: var(--accent); }
+
+    /* ── Main Layout ──────────────────────────────────────────────────── */
+    main {
+      flex: 1;
+      display: flex;
+      gap: 0;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 40px 24px;
+    }
+
+    /* ── Left: Input Panel ────────────────────────────────────────────── */
+    .panel-left {
+      width: 340px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding-right: 32px;
+      border-right: 1px solid var(--border);
+    }
+
+    .panel-left h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    label {
+      font-size: 13px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    select, textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-glow);
+    }
+
+    textarea {
+      height: 110px;
+      resize: none;
+      line-height: 1.6;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn:hover  { background: #388bfd; }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { background: #21262d; color: var(--muted); cursor: not-allowed; }
+
+    .examples {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .example-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .example-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Right: Output Panel ──────────────────────────────────────────── */
+    .panel-right {
+      flex: 1;
+      padding-left: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .output-header h2 { font-size: 18px; font-weight: 700; }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      display: inline-block;
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    /* Result box */
+    .result-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      min-height: 380px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--text);
+      white-space: pre-wrap;
+      overflow-y: auto;
+    }
+
+    .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 340px;
+      gap: 12px;
+      color: var(--muted);
+    }
+
+    .placeholder .icon { font-size: 48px; }
+    .placeholder p { font-size: 14px; text-align: center; max-width: 260px; line-height: 1.6; }
+
+    /* Loader */
+    .loader {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 340px;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loader p { color: var(--muted); font-size: 14px; }
+
+    /* Metadata bar */
+    .meta-bar {
+      display: none;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .meta-bar .tag {
+      background: var(--blue-glow);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      margin-left: auto;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    /* Error */
+    .error-box {
+      display: none;
+      background: rgba(248, 81, 73, 0.1);
+      border: 1px solid rgba(248, 81, 73, 0.4);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      color: #f85149;
+      font-size: 14px;
+    }
+
+    /* ── Footer ───────────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Responsive ───────────────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      main { flex-direction: column; padding: 20px 16px; }
+      .panel-left { width: 100%; border-right: none; padding-right: 0; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
+      .panel-right { padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo">🔬</div>
+  <h1>ResearchMate <span>AI Research Agent</span></h1>
+  <div class="ibm-badge">Powered by <b>IBM Granite</b></div>
+</header>
+
+<!-- Main -->
+<main>
+
+  <!-- Left Panel -->
+  <div class="panel-left">
+    <h2>New Research Query</h2>
+
+    <div>
+      <label for="domain">Research Domain</label>
+      <select id="domain">
+        <option value="General">General</option>
+        <option value="Computer Science & AI">Computer Science & AI</option>
+        <option value="Machine Learning">Machine Learning</option>
+        <option value="Biology & Medicine">Biology & Medicine</option>
+        <option value="Physics">Physics</option>
+        <option value="Environmental Science">Environmental Science</option>
+        <option value="Economics">Economics</option>
+        <option value="Psychology">Psychology</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="topic">Research Topic</label>
+      <textarea id="topic" placeholder="e.g. Transformer architecture in large language models"></textarea>
+    </div>
+
+    <button class="btn" id="searchBtn" onclick="research()">
+      <span id="btnIcon">🔍</span>
+      <span id="btnText">Research</span>
+    </button>
+
+    <div>
+      <label>Try an example</label>
+      <div class="examples">
+        <div class="example-chip" onclick="fillExample('Federated learning for privacy-preserving AI', 'Machine Learning')">Federated learning & privacy</div>
+        <div class="example-chip" onclick="fillExample('CRISPR gene editing applications in medicine', 'Biology & Medicine')">CRISPR gene editing</div>
+        <div class="example-chip" onclick="fillExample('Quantum computing and cryptography', 'Physics')">Quantum computing</div>
+        <div class="example-chip" onclick="fillExample('Carbon capture technologies for climate change', 'Environmental Science')">Carbon capture tech</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="panel-right">
+    <div class="output-header">
+      <h2><span class="status-dot"></span>Research Output</h2>
+    </div>
+
+    <!-- Meta bar (shown after result) -->
+    <div class="meta-bar" id="metaBar">
+      <span class="tag" id="metaDomain">General</span>
+      <span id="metaTime"></span>
+      <button class="copy-btn" onclick="copyResult()">Copy</button>
+    </div>
+
+    <!-- Error -->
+    <div class="error-box" id="errorBox"></div>
+
+    <!-- Result area -->
+    <div class="result-box" id="resultBox">
+      <div class="placeholder">
+        <div class="icon">📄</div>
+        <p>Enter a topic on the left and click <strong>Research</strong> to get a structured academic overview.</p>
+      </div>
+    </div>
+
+    <!-- Loader (hidden inside result box when loading) -->
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      <p>IBM Granite is researching your topic…</p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  ResearchMate · Built with IBM watsonx.ai &amp; IBM Granite · AICTE IBM SkillsBuild 2026
+</footer>
+
+<script>
+  async function research() {
+    const topic  = document.getElementById('topic').value.trim();
+    const domain = document.getElementById('domain').value;
+    const btn    = document.getElementById('searchBtn');
+
+    if (!topic) {
+      showError('Please enter a research topic.');
+      return;
+    }
+
+    // UI → loading state
+    setLoading(true);
+    hideError();
+    btn.disabled = true;
+
+    const t0 = Date.now();
+
+    try {
+      const res  = await fetch('/research', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, domain })
+      });
+      const data = await res.json();
+
+      if (data.error) { showError(data.error); return; }
+
+      const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+      showResult(data.result, domain, elapsed);
+
+    } catch (err) {
+      showError('Could not connect to the server. Make sure app.py is running.');
+    } finally {
+      setLoading(false);
+      btn.disabled = false;
+    }
+  }
+
+  function setLoading(on) {
+    const box    = document.getElementById('resultBox');
+    const loader = document.getElementById('loader');
+    const meta   = document.getElementById('metaBar');
+    const icon   = document.getElementById('btnIcon');
+    const text   = document.getElementById('btnText');
+
+    if (on) {
+      box.style.display    = 'none';
+      loader.style.display = 'flex';
+      meta.style.display   = 'none';
+      icon.textContent     = '⏳';
+      text.textContent     = 'Researching…';
+    } else {
+      box.style.display    = 'block';
+      loader.style.display = 'none';
+      icon.textContent     = '🔍';
+      text.textContent     = 'Research';
+    }
+  }
+
+  function showResult(text, domain, elapsed) {
+    const box  = document.getElementById('resultBox');
+    const meta = document.getElementById('metaBar');
+
+    box.innerHTML        = escapeHtml(text);
+    meta.style.display   = 'flex';
+    document.getElementById('metaDomain').textContent = domain;
+    document.getElementById('metaTime').textContent   = `Generated in ${elapsed}s`;
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorBox');
+    el.textContent    = '⚠ ' + msg;
+    el.style.display  = 'block';
+  }
+
+  function hideError() {
+    document.getElementById('errorBox').style.display = 'none';
+  }
+
+  function fillExample(topic, domain) {
+    document.getElementById('topic').value  = topic;
+    document.getElementById('domain').value = domain;
+  }
+
+  function copyResult() {
+    const text = document.getElementById('resultBox').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied ✓';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  // Allow Ctrl+Enter to submit
+  document.getElementById('topic').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.ctrlKey) research();
+  });
+</script>
+
+</body>
+</html>
