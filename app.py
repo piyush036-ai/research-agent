@@ -10,7 +10,7 @@ app = Flask(__name__)
 IBM_API_KEY    = os.environ.get("I0q_Vlcqmx2imk9Ft9rdVfPkfuEn7WkckBNQmkjNjezC")
 IBM_PROJECT_ID = os.environ.get("c5cfb7b8-e423-4774-b20b-5486195ca6fe")
 IBM_URL        = os.environ.get("IBM_URL", "https://us-south.ml.cloud.ibm.com")
-credentials = Credentials(url=IBM_URL, api_key=IBM_API_KEY)
+credentials = Credentials(url="https://us-south.ml.cloud.ibm.com", api_key="I0q_Vlcqmx2imk9Ft9rdVfPkfuEn7WkckBNQmkjNjezC")
 
 model = ModelInference(
     model_id="ibm/granite-4-h-small",
