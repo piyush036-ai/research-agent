@@ -4,13 +4,21 @@ from flask import Flask, request, jsonify, render_template
 from ibm_watsonx_ai import Credentials
 from ibm_watsonx_ai.foundation_models import ModelInference
 
-load_dotenv()  
+load_dotenv()
 
 app = Flask(__name__)
 
 IBM_API_KEY    = os.environ.get("IBM_API_KEY")
 IBM_PROJECT_ID = os.environ.get("IBM_PROJECT_ID")
 IBM_URL        = os.environ.get("IBM_URL", "https://us-south.ml.cloud.ibm.com")
+
+if not IBM_API_KEY or not IBM_PROJECT_ID:
+    raise RuntimeError("Missing IBM_API_KEY or IBM_PROJECT_ID environment variables.")
+
+credentials = Credentials(
+    url=IBM_URL,
+    api_key=IBM_API_KEY,
+)
 
 model = ModelInference(
     model_id="ibm/granite-4-h-small",
@@ -22,7 +30,7 @@ model = ModelInference(
     }
 )
 
-# ── Routes ───────────────────────────────────────────────────────────────────
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -38,6 +46,7 @@ def research():
         return jsonify({"error": "Please enter a research topic."}), 400
 
     prompt = f"""You are an expert academic research assistant.
+
 Domain: {domain}
 Research Topic: {topic}
 
