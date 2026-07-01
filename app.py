@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify, render_template
 from ibm_watsonx_ai import Credentials
 from ibm_watsonx_ai.foundation_models import ModelInference
 
-load_dotenv()  # loads the .env file automatically
+load_dotenv()  
 
 app = Flask(__name__)
 
