@@ -1,16 +1,16 @@
 import os
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify, render_template
 from ibm_watsonx_ai import Credentials
 from ibm_watsonx_ai.foundation_models import ModelInference
 
+load_dotenv()  # loads the .env file automatically
+
 app = Flask(__name__)
 
-# ── IBM watsonx credentials ──────────────────────────────────────────────────
-# Read from environment variables (set these in Render's dashboard, never in code)
 IBM_API_KEY    = os.environ.get("IBM_API_KEY")
 IBM_PROJECT_ID = os.environ.get("IBM_PROJECT_ID")
-IBM_URL        = os.environ.get("IBM_URL")
-credentials = Credentials(url=IBM_URL, api_key=IBM_API_KEY)
+IBM_URL        = os.environ.get("IBM_URL", "https://us-south.ml.cloud.ibm.com")
 
 model = ModelInference(
     model_id="ibm/granite-4-h-small",
